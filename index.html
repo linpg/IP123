@@ -14,19 +14,16 @@
 
   <p id="result" class="text-2xl text-yellow-400 font-semibold bg-gray-800 px-4 py-2 rounded-lg shadow-md font-mono"></p>
   <p id="timestamp" class="text-base text-gray-400 mt-2 font-mono"></p>
-
-  <button onclick="copyIP()" class="mt-4 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold rounded-lg">
-    复制 IP
-  </button>
+  <p id="userAgent" class="text-sm text-gray-500 mt-2 font-mono break-words max-w-xl"></p>
 
   <script>
     async function getIP() {
       const apis = [
         'https://api.ipify.org?format=json',
-        'https://ipinfo.io/json?token=demo', // 可以注册免费 token（每天最多1,000次）
+        'https://ipinfo.io/json?token=demo',
         'https://ipv4.jsonip.com',
         'https://api.my-ip.io/ip.json',
-        'https://checkip.amazonaws.com' // 最后一个保底，但格式不同
+        'https://checkip.amazonaws.com'
       ];
 
       for (const url of apis) {
@@ -45,24 +42,15 @@
           if (ip) {
             document.getElementById('result').innerText = ip;
             document.getElementById('timestamp').innerText = '时间戳：' + new Date().toLocaleString('zh-Hant-TW');
+            document.getElementById('userAgent').innerText = '浏览器信息：' + navigator.userAgent;
             return;
           }
         } catch (err) {
-          // 尝试下一个 API
           continue;
         }
       }
 
       document.getElementById('result').innerText = "无法获取 IP，请检查网络连接";
-    }
-
-    function copyIP() {
-      const ipText = document.getElementById('result').innerText;
-      if (ipText) {
-        navigator.clipboard.writeText(ipText).then(() => {
-          alert("IP 已复制！");
-        });
-      }
     }
 
     getIP();
