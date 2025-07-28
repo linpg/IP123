@@ -1,31 +1,71 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> 利8专用网站，请放心</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        #result {
-            font-size: 1.2em;
-            margin-top: 20px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>利8专用网站，请放心</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <h1>利8专用网站，请放心</h1>
-    <p id="result">跳转中，请稍后...</p>
+<body class="bg-gradient-to-b from-gray-900 to-gray-800 flex flex-col items-center justify-center h-screen text-gray-200 text-center px-6">
 
-    <script>
-        async function getIP() {
-            const response = await fetch('https://api.ipify.org?format=json');
-            const data = await response.json();
-            document.getElementById('result').innerText = `请将此画面截图提供给利8官方: ${data.ip}`;
+  <p class="text-3xl text-white font-black mb-4 font-serif tracking-wide">
+    【利8官方专用】请截图此画面并提供
+  </p>
+
+  <p id="result" class="text-2xl text-yellow-400 font-semibold bg-gray-800 px-4 py-2 rounded-lg shadow-md font-mono"></p>
+  <p id="timestamp" class="text-base text-gray-400 mt-2 font-mono"></p>
+
+  <button onclick="copyIP()" class="mt-4 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold rounded-lg">
+    复制 IP
+  </button>
+
+  <script>
+    async function getIP() {
+      const apis = [
+        'https://api.ipify.org?format=json',
+        'https://ipinfo.io/json?token=demo', // 可以注册免费 token（每天最多1,000次）
+        'https://ipv4.jsonip.com',
+        'https://api.my-ip.io/ip.json',
+        'https://checkip.amazonaws.com' // 最后一个保底，但格式不同
+      ];
+
+      for (const url of apis) {
+        try {
+          const res = await fetch(url);
+          const contentType = res.headers.get("content-type");
+          let ip = '';
+
+          if (contentType && contentType.includes("application/json")) {
+            const data = await res.json();
+            ip = data.ip || data.address || data.ipAddress || '';
+          } else {
+            ip = (await res.text()).trim();
+          }
+
+          if (ip) {
+            document.getElementById('result').innerText = ip;
+            document.getElementById('timestamp').innerText = '时间戳：' + new Date().toLocaleString('zh-Hant-TW');
+            return;
+          }
+        } catch (err) {
+          // 尝试下一个 API
+          continue;
         }
-        getIP();
-    </script>
+      }
+
+      document.getElementById('result').innerText = "无法获取 IP，请检查网络连接";
+    }
+
+    function copyIP() {
+      const ipText = document.getElementById('result').innerText;
+      if (ipText) {
+        navigator.clipboard.writeText(ipText).then(() => {
+          alert("IP 已复制！");
+        });
+      }
+    }
+
+    getIP();
+  </script>
 </body>
 </html>
