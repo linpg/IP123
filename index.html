@@ -18,55 +18,21 @@
 
   <script>
     async function getIP() {
-      const apis = [
-        {
-          url: 'https://ip.taobao.com/outGetIpInfo?ip=myip&accessKey=alibaba-inc',
-          parse: res => res.data && res.data.ip
-        },
-        {
-          url: 'https://api.ipify.org?format=json',
-          parse: res => res.ip
-        },
-        {
-          url: 'https://ipv4.jsonip.com',
-          parse: res => res.ip
-        },
-        {
-          url: 'https://api.my-ip.io/ip.json',
-          parse: res => res.ip
-        },
-        {
-          url: 'https://checkip.amazonaws.com',
-          parse: text => text.trim(),
-          isText: true
+      try {
+        const response = await fetch('ip.php'); // 🔺 連到主機本地的 ip.php
+        const data = await response.json();
+        const ip = data.ip;
+
+        if (ip) {
+          document.getElementById('result').innerText = ip;
+          document.getElementById('timestamp').innerText = '时间戳：' + new Date().toLocaleString('zh-Hant-TW');
+          document.getElementById('userAgent').innerText = '浏览器信息：' + navigator.userAgent;
+        } else {
+          document.getElementById('result').innerText = "无法获取 IP，请检查网络连接";
         }
-      ];
-
-      for (const api of apis) {
-        try {
-          const res = await fetch(api.url);
-          const contentType = res.headers.get("content-type");
-
-          let ip = '';
-          if (api.isText) {
-            ip = api.parse(await res.text());
-          } else {
-            const data = await res.json();
-            ip = api.parse(data);
-          }
-
-          if (ip) {
-            document.getElementById('result').innerText = ip;
-            document.getElementById('timestamp').innerText = '时间戳：' + new Date().toLocaleString('zh-Hant-TW');
-            document.getElementById('userAgent').innerText = '浏览器信息：' + navigator.userAgent;
-            return;
-          }
-        } catch (err) {
-          continue; // 尝试下一个
-        }
+      } catch (e) {
+        document.getElementById('result').innerText = "无法获取 IP，请检查网络连接";
       }
-
-      document.getElementById('result').innerText = "无法获取 IP，请检查网络连接";
     }
 
     getIP();
