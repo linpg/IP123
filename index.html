@@ -12,31 +12,47 @@
     【利8官方专用】请截图此画面并提供
   </p>
 
-  <p id="result" class="text-2xl text-yellow-400 font-semibold bg-gray-800 px-4 py-2 rounded-lg shadow-md font-mono"></p>
+  <p id="result" class="text-2xl text-yellow-400 font-semibold bg-gray-800 px-4 py-2 rounded-lg shadow-md font-mono">载入中…</p>
   <p id="timestamp" class="text-base text-gray-400 mt-2 font-mono"></p>
   <p id="userAgent" class="text-sm text-gray-500 mt-2 font-mono break-words max-w-xl"></p>
 
   <script>
     async function getIP() {
       const apis = [
-        'https://api.ipify.org?format=json',
-        'https://ipinfo.io/json?token=demo',
-        'https://ipv4.jsonip.com',
-        'https://api.my-ip.io/ip.json',
-        'https://checkip.amazonaws.com'
+        {
+          url: 'https://ip.taobao.com/outGetIpInfo?ip=myip&accessKey=alibaba-inc',
+          parse: res => res.data && res.data.ip
+        },
+        {
+          url: 'https://api.ipify.org?format=json',
+          parse: res => res.ip
+        },
+        {
+          url: 'https://ipv4.jsonip.com',
+          parse: res => res.ip
+        },
+        {
+          url: 'https://api.my-ip.io/ip.json',
+          parse: res => res.ip
+        },
+        {
+          url: 'https://checkip.amazonaws.com',
+          parse: text => text.trim(),
+          isText: true
+        }
       ];
 
-      for (const url of apis) {
+      for (const api of apis) {
         try {
-          const res = await fetch(url);
+          const res = await fetch(api.url);
           const contentType = res.headers.get("content-type");
-          let ip = '';
 
-          if (contentType && contentType.includes("application/json")) {
-            const data = await res.json();
-            ip = data.ip || data.address || data.ipAddress || '';
+          let ip = '';
+          if (api.isText) {
+            ip = api.parse(await res.text());
           } else {
-            ip = (await res.text()).trim();
+            const data = await res.json();
+            ip = api.parse(data);
           }
 
           if (ip) {
@@ -46,7 +62,7 @@
             return;
           }
         } catch (err) {
-          continue;
+          continue; // 尝试下一个
         }
       }
 
